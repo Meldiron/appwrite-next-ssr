@@ -210,7 +210,7 @@ export default function Home() {
               </h3>
             </div>
             <div className="mt-2 mb-4 text-sm text-left text-gray-700 dark:text-gray-300">
-              Let's make an account with 1 click! This will create anonymous
+              Lets make an account with 1 click! This will create anonymous
               session.
             </div>
             <div className="flex">
