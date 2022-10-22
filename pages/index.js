@@ -108,7 +108,9 @@ export default function Home({ serverAccount }) {
         </p>
         <div className="flex flex-col mb-12 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
           <a
-            href="#"
+            href="https://github.com/Meldiron/appwrite-next-ssr"
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
           >
             <svg
