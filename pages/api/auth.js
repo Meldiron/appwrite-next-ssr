@@ -23,7 +23,6 @@ export default async function handler(req, res) {
 
     const response = await request.json();
 
-    const hostname = req.headers.host.split(":")[0];
     const cookie = request.headers
       .get("set-cookie")
       .split("." + APPWRITE_HOSTNAME)

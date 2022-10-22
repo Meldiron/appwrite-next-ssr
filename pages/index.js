@@ -1,7 +1,37 @@
 import { useState } from "react";
-import { AppwriteService } from "../lib/appwrite";
+import { AppwriteService, APPWRITE_PROJECT_ID } from "../lib/appwrite";
 
-export default function Home() {
+export async function getServerSideProps({ req, res }) {
+  const sessionNames = [
+    'a_session_' + APPWRITE_PROJECT_ID.toLowerCase(),
+    'a_session_' + APPWRITE_PROJECT_ID.toLowerCase() + '_legacy',
+  ];
+
+  let hash = req.cookies[sessionNames[0]] ?? req.cookies[sessionNames[1]] ?? '';
+
+  AppwriteService.setSession(hash);
+
+  let account;
+  try {
+    account = await AppwriteService.getAccount();
+  } catch(err) {
+    console.error(err);
+  }
+
+  console.log(account);
+
+  const serverAccount = account ? {
+    color: "text-green-500", text: "Signed in as " + account.$id
+  } : {
+    color: "text-red-500", text: "You are not signed in."
+  }
+
+  return {
+    props: {serverAccount},
+  }
+}
+
+export default function Home({ serverAccount }) {
   const [clientAccount, setClientAccount] = useState({ color: "text-orange-500", text: "Not fetched yet." });
 
   async function login() {
@@ -19,16 +49,26 @@ export default function Home() {
     }
   }
 
+  async function logout() {
+    try {
+      await AppwriteService.deleteSession();
+      alert("Done. Fetch status, or refresh website.");
+    } catch (err) {
+      console.error(err);
+      alert("Whoops! Check console logs.");
+    }
+  }
+
   async function getAccount() {
     setClientAccount({ color: "text-blue-500", text: "Fetching ..." });
 
     try {
       const account = await AppwriteService.getAccount();
       console.log(account);
-      setClientAccount({ color: "text-green-500", text: "Authorized as " + account.$id });
+      setClientAccount({ color: "text-green-500", text: "Signed in as " + account.$id });
     } catch (err) {
       console.error(err);
-      setClientAccount({ color: "text-red-500", text: "Whoops! Check console logs." });
+      setClientAccount({ color: "text-red-500", text: "You are not signed in." });
     }
   }
 
@@ -113,7 +153,8 @@ export default function Home() {
               </div>
               <h2 className="mb-2 text-2xl font-bold tracking-tight text-left text-gray-900 dark:text-white">
                 <svg
-                  className="inline-block mr-2 text-green-500"
+                  className={"inline-block mr-2 " + serverAccount.color}
+
                   width="20"
                   height="20"
                   viewBox="0 0 8 8"
@@ -122,7 +163,7 @@ export default function Home() {
                 >
                   <circle cx="4" cy="4" r="4" fill="currentColor"></circle>
                 </svg>
-                You Are Authroized
+                {serverAccount.text}
               </h2>
 
               <div className="mt-6">
@@ -214,7 +255,7 @@ export default function Home() {
               session.
             </div>
             <div className="flex">
-              <button
+            <button
                 onClick={() => login()}
                 type="button"
                 className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:focus:ring-gray-600"
@@ -234,6 +275,28 @@ export default function Home() {
                   />
                 </svg>
                 Sign In
+              </button>
+
+              <button
+                onClick={() => logout()}
+                type="button"
+                className="text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-xs px-3 py-1.5 mr-2 text-center inline-flex items-center dark:bg-gray-600 dark:hover:bg-gray-500 dark:focus:ring-gray-600"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="-ml-0.5 mr-2 h-4 w-4 transform rotate-180"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+                  />
+                </svg>
+                Sign Out
               </button>
             </div>
           </div>
